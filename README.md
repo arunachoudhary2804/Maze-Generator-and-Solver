@@ -1,2 +1,10 @@
 # Maze Generator and Solver
- Version 1
+
+## How to Run
+1. Clone the repository.
+2. Create a virtual environment and install dependencies:
+```sh
+python -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+pip install -r requirements.txt
+
