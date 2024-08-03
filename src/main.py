@@ -6,7 +6,7 @@ CELL_SIZE = 20
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-RED = (255, 0, 0)  # From maze-solver branch
+RED = (255, 0, 0)
 
 def generate_maze(rows, cols):
     maze = [[1 for _ in range(cols)] for _ in range(rows)]
@@ -51,7 +51,7 @@ def draw_maze(screen, maze):
             color = WHITE if maze[row][col] == 0 else BLACK
             pygame.draw.rect(screen, color, pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
-def solve_maze(maze, start, end):  # From maze-solver branch
+def solve_maze(maze, start, end):
     rows, cols = len(maze), len(maze[0])
     stack = [start]
     path = []
@@ -70,7 +70,7 @@ def solve_maze(maze, start, end):  # From maze-solver branch
 
     return path
 
-def draw_solution(screen, path):  # From maze-solver branch
+def draw_solution(screen, path):
     for cell in path:
         row, col = cell
         pygame.draw.rect(screen, RED, pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE))
@@ -80,22 +80,28 @@ def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption('Maze Generator and Solver')
 
-    rows, cols = HEIGHT // CELL_SIZE, WIDTH // CELL_SIZE
-    maze = generate_maze(rows, cols)
+    def new_maze():
+        rows, cols = HEIGHT // CELL_SIZE, WIDTH // CELL_SIZE
+        maze = generate_maze(rows, cols)
+        start = (1, 1)
+        end = (rows - 2, cols - 2)
+        path = solve_maze(maze, start, end)
+        return maze, path
 
-    start = (1, 1)  # From maze-solver branch
-    end = (rows - 2, cols - 2)  # From maze-solver branch
-    path = solve_maze(maze, start, end)  # From maze-solver branch
+    maze, path = new_maze()
 
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    maze, path = new_maze()
 
         screen.fill(BLACK)
         draw_maze(screen, maze)
-        draw_solution(screen, path)  # From maze-solver branch
+        draw_solution(screen, path)
         pygame.display.flip()
 
     pygame.quit()
