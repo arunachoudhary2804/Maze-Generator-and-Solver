@@ -135,6 +135,42 @@ def main():
         draw_end_point(screen, end)
         pygame.display.flip()
 
+        if won:
+            # Display winning message and wait for user input
+            screen.fill(BLACK)
+            font = pygame.font.SysFont(None, 40)  # Reduced font size
+            text1 = font.render("Congratulations!", True, WHITE)
+            text2 = font.render("You solved the maze!", True, WHITE)
+
+            text1_rect = text1.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 30))
+            text2_rect = text2.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 30))
+
+            screen.blit(text1, text1_rect)
+            screen.blit(text2, text2_rect)
+
+            restart_text = font.render("Press R to Restart or Q to Quit", True, WHITE)
+            restart_text_rect = restart_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 90))
+            screen.blit(restart_text, restart_text_rect)
+
+            pygame.display.flip()
+
+            waiting = True
+            while waiting:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running = False
+                        waiting = False
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_r:
+                            maze, player_pos, end = new_maze()
+                            won = False
+                            waiting = False
+                        elif event.key == pygame.K_q:
+                            running = False
+                            waiting = False
+
+        clock.tick(FPS)
+
     pygame.quit()
 
 if __name__ == "__main__":
