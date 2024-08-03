@@ -10,8 +10,9 @@ source venv/bin/activate  # On Windows use `venv\Scripts\activate`
 pip install -r requirements.txt
 
 python src/main.py
+```
 
 ## Controls
 
-<code> Arrow Keys <code> : Move the Player object
-<code> Space <code> : Generate a new maze
+ `Arrow Keys` : Move the Player object <br>
+ `Space` : Generate a new maze
