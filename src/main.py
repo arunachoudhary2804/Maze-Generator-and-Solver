@@ -100,10 +100,7 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_r:
-                    maze, player_pos, end, path = new_maze()
-                elif event.key == pygame.K_SPACE:
-                    # Regenerate the maze and reset player position
+                if event.key == pygame.K_SPACE:
                     maze, player_pos, end, path = new_maze()
                 elif event.key == pygame.K_UP:
                     new_pos = (player_pos[0] - 1, player_pos[1])
