@@ -1,4 +1,11 @@
+import pygame
 import random
+
+WIDTH, HEIGHT = 600, 600
+CELL_SIZE = 20
+
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 
 def generate_maze(rows, cols):
     maze = [[1 for _ in range(cols)] for _ in range(rows)]
@@ -36,8 +43,32 @@ def generate_maze(rows, cols):
 
     return maze
 
-if __name__ == "__main__":
-    rows, cols = 21, 21
+def draw_maze(screen, maze):
+    rows, cols = len(maze), len(maze[0])
+    for row in range(rows):
+        for col in range(cols):
+            color = WHITE if maze[row][col] == 0 else BLACK
+            pygame.draw.rect(screen, color, pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+
+def main():
+    pygame.init()
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption('Maze Generator and Solver')
+
+    rows, cols = HEIGHT // CELL_SIZE, WIDTH // CELL_SIZE
     maze = generate_maze(rows, cols)
-    for row in maze:
-        print("".join(['#' if cell else ' ' for cell in row]))
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        screen.fill(BLACK)
+        draw_maze(screen, maze)
+        pygame.display.flip()
+
+    pygame.quit()
+
+if __name__ == "__main__":
+    main()
