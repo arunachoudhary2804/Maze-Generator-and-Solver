@@ -7,9 +7,9 @@ CELL_SIZE = 20
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)  # Color for the endpoint
-TEXT_COLOR = (255, 255, 0)  # Color for text
+GREEN = (0, 255, 0)  # Color for player
+BLUE = (0, 0, 255)   # Color for the end point
+FPS = 60
 
 def generate_maze(rows, cols):
     maze = [[1 for _ in range(cols)] for _ in range(rows)]
@@ -47,16 +47,12 @@ def generate_maze(rows, cols):
 
     return maze
 
-def draw_maze(screen, maze, end):
+def draw_maze(screen, maze):
     rows, cols = len(maze), len(maze[0])
     for row in range(rows):
         for col in range(cols):
             color = WHITE if maze[row][col] == 0 else BLACK
             pygame.draw.rect(screen, color, pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE))
-    
-    # Draw the endpoint symbol
-    end_row, end_col = end
-    pygame.draw.circle(screen, BLUE, (end_col * CELL_SIZE + CELL_SIZE // 2, end_row * CELL_SIZE + CELL_SIZE // 2), CELL_SIZE // 3)
 
 def solve_maze(maze, start, end):
     rows, cols = len(maze), len(maze[0])
@@ -85,80 +81,98 @@ def draw_solution(screen, path):
 def draw_player(screen, player_pos):
     pygame.draw.rect(screen, GREEN, pygame.Rect(player_pos[1] * CELL_SIZE, player_pos[0] * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
-def display_message(screen, message):
-    font = pygame.font.SysFont(None, 55)
-    text_surface = font.render(message, True, TEXT_COLOR)
-    text_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-    screen.blit(text_surface, text_rect)
+def draw_end_point(screen, end_pos):
+    pygame.draw.rect(screen, BLUE, pygame.Rect(end_pos[1] * CELL_SIZE, end_pos[0] * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption('Maze Generator and Solver')
+    clock = pygame.time.Clock()
 
     def new_maze():
         rows, cols = HEIGHT // CELL_SIZE, WIDTH // CELL_SIZE
         maze = generate_maze(rows, cols)
         start = (1, 1)
-        
-        # Ensure endpoint is on the maze border and accessible
         end = (rows - 2, cols - 2)
+        # Ensure the end position is on a path cell
+        while maze[end[0]][end[1]] != 0:
+            end = (random.randint(1, rows - 2), random.randint(1, cols - 2))
         path = solve_maze(maze, start, end)
         return maze, start, end, path
 
-    def reset_game():
-        nonlocal maze, player_pos, end, path, game_over
-        maze, player_pos, end, path = new_maze()
-        game_over = False
-
     maze, player_pos, end, path = new_maze()
-    game_over = False
 
-    while True:
+    running = True
+    won = False
+
+    while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                return
+                running = False
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and not game_over:
-                    # Regenerate the maze and reset player position
-                    reset_game()
-                elif event.key == pygame.K_r and game_over:
-                    # Restart the game
-                    reset_game()
-                elif event.key == pygame.K_q and game_over:
-                    # Quit the game
-                    pygame.quit()
-                    return
-                elif event.key == pygame.K_UP and not game_over:
+                if event.key == pygame.K_r:
+                    maze, player_pos, end, path = new_maze()
+                    won = False
+                elif event.key == pygame.K_SPACE:
+                    maze, player_pos, end, path = new_maze()
+                    won = False
+                elif event.key == pygame.K_UP:
                     new_pos = (player_pos[0] - 1, player_pos[1])
                     if 0 <= new_pos[0] < len(maze) and maze[new_pos[0]][new_pos[1]] == 0:
                         player_pos = new_pos
-                elif event.key == pygame.K_DOWN and not game_over:
+                elif event.key == pygame.K_DOWN:
                     new_pos = (player_pos[0] + 1, player_pos[1])
                     if 0 <= new_pos[0] < len(maze) and maze[new_pos[0]][new_pos[1]] == 0:
                         player_pos = new_pos
-                elif event.key == pygame.K_LEFT and not game_over:
+                elif event.key == pygame.K_LEFT:
                     new_pos = (player_pos[0], player_pos[1] - 1)
                     if 0 <= new_pos[1] < len(maze[0]) and maze[new_pos[0]][new_pos[1]] == 0:
                         player_pos = new_pos
-                elif event.key == pygame.K_RIGHT and not game_over:
+                elif event.key == pygame.K_RIGHT:
                     new_pos = (player_pos[0], player_pos[1] + 1)
                     if 0 <= new_pos[1] < len(maze[0]) and maze[new_pos[0]][new_pos[1]] == 0:
                         player_pos = new_pos
 
+        # Check if player reached the end
         if player_pos == end:
-            game_over = True
+            won = True
 
         screen.fill(BLACK)
-        draw_maze(screen, maze, end)
+        draw_maze(screen, maze)
         draw_solution(screen, path)
         draw_player(screen, player_pos)
-
-        if game_over:
-            display_message(screen, "Congratulations! You solved the maze. Press R to play again or Q to quit.")
-        
+        draw_end_point(screen, end)
         pygame.display.flip()
+
+        if won:
+            # Display winning message and wait for user input
+            screen.fill(BLACK)
+            font = pygame.font.SysFont(None, 55)
+            text = font.render("Congratulations! You solved the maze!", True, WHITE)
+            screen.blit(text, (WIDTH // 4 - 50, HEIGHT // 2 - 50))
+            restart_text = font.render("Press R to Restart or Q to Quit", True, WHITE)
+            screen.blit(restart_text, (WIDTH // 4 - 50, HEIGHT // 2 + 50))
+            pygame.display.flip()
+
+            waiting = True
+            while waiting:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running = False
+                        waiting = False
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_r:
+                            maze, player_pos, end, path = new_maze()
+                            won = False
+                            waiting = False
+                        elif event.key == pygame.K_q:
+                            running = False
+                            waiting = False
+
+        clock.tick(FPS)
+
+    pygame.quit()
 
 if __name__ == "__main__":
     main()
