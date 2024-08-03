@@ -1,5 +1,5 @@
 # Maze Generator and Solver
-This project is a simple maze generator and solver game implemented in Python using the Pygame library.
+This project is a simple maze solver game implemented in Python using the Pygame library.
 
 ## How to Run
 1. Clone the repository.
