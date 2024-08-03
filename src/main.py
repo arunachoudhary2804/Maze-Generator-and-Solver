@@ -4,10 +4,10 @@ import random
 # Constants
 WIDTH, HEIGHT = 600, 600
 CELL_SIZE = 20
-
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
+GREEN = (0, 255, 0)
 
 def generate_maze(rows, cols):
     maze = [[1 for _ in range(cols)] for _ in range(rows)]
@@ -76,6 +76,9 @@ def draw_solution(screen, path):
         row, col = cell
         pygame.draw.rect(screen, RED, pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
+def draw_player(screen, player_pos):
+    pygame.draw.rect(screen, GREEN, pygame.Rect(player_pos[1] * CELL_SIZE, player_pos[0] * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -87,9 +90,9 @@ def main():
         start = (1, 1)
         end = (rows - 2, cols - 2)
         path = solve_maze(maze, start, end)
-        return maze, path
+        return maze, start, end, path
 
-    maze, path = new_maze()
+    maze, player_pos, end, path = new_maze()
 
     running = True
     while running:
@@ -98,12 +101,33 @@ def main():
                 running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    maze, path = new_maze()
+                    maze, player_pos, end, path = new_maze()
+                elif event.key == pygame.K_UP:
+                    new_pos = (player_pos[0] - 1, player_pos[1])
+                    if 0 <= new_pos[0] < len(maze) and maze[new_pos[0]][new_pos[1]] == 0:
+                        player_pos = new_pos
+                elif event.key == pygame.K_DOWN:
+                    new_pos = (player_pos[0] + 1, player_pos[1])
+                    if 0 <= new_pos[0] < len(maze) and maze[new_pos[0]][new_pos[1]] == 0:
+                        player_pos = new_pos
+                elif event.key == pygame.K_LEFT:
+                    new_pos = (player_pos[0], player_pos[1] - 1)
+                    if 0 <= new_pos[1] < len(maze[0]) and maze[new_pos[0]][new_pos[1]] == 0:
+                        player_pos = new_pos
+                elif event.key == pygame.K_RIGHT:
+                    new_pos = (player_pos[0], player_pos[1] + 1)
+                    if 0 <= new_pos[1] < len(maze[0]) and maze[new_pos[0]][new_pos[1]] == 0:
+                        player_pos = new_pos
 
         screen.fill(BLACK)
         draw_maze(screen, maze)
         draw_solution(screen, path)
+        draw_player(screen, player_pos)
         pygame.display.flip()
+
+        if player_pos == end:
+            print("Maze solved!")
+            running = False
 
     pygame.quit()
 
