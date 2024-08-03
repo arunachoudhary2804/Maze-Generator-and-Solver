@@ -1,5 +1,6 @@
 import pygame
 import random
+from collections import deque
 
 # Constants
 WIDTH, HEIGHT = 600, 600
@@ -47,36 +48,30 @@ def generate_maze(rows, cols):
 
     return maze
 
+def find_farthest_point(maze, start):
+    rows, cols = len(maze), len(maze[0])
+    queue = deque([start])
+    visited = set([start])
+    farthest_point = start
+
+    while queue:
+        point = queue.popleft()
+        farthest_point = point
+        row, col = point
+        for d_row, d_col in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            n_row, n_col = row + d_row, col + d_col
+            if 0 <= n_row < rows and 0 <= n_col < cols and maze[n_row][n_col] == 0 and (n_row, n_col) not in visited:
+                queue.append((n_row, n_col))
+                visited.add((n_row, n_col))
+
+    return farthest_point
+
 def draw_maze(screen, maze):
     rows, cols = len(maze), len(maze[0])
     for row in range(rows):
         for col in range(cols):
             color = WHITE if maze[row][col] == 0 else BLACK
             pygame.draw.rect(screen, color, pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE))
-
-def solve_maze(maze, start, end):
-    rows, cols = len(maze), len(maze[0])
-    stack = [start]
-    path = []
-
-    while stack:
-        current = stack.pop()
-        path.append(current)
-        if current == end:
-            return path
-
-        row, col = current
-        for d_row, d_col in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
-            n_row, n_col = row + d_row, col + d_col
-            if 0 <= n_row < rows and 0 <= n_col < cols and maze[n_row][n_col] == 0 and (n_row, n_col) not in path:
-                stack.append((n_row, n_col))
-
-    return path
-
-def draw_solution(screen, path):
-    for cell in path:
-        row, col = cell
-        pygame.draw.rect(screen, RED, pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
 def draw_player(screen, player_pos):
     pygame.draw.rect(screen, GREEN, pygame.Rect(player_pos[1] * CELL_SIZE, player_pos[0] * CELL_SIZE, CELL_SIZE, CELL_SIZE))
@@ -94,14 +89,10 @@ def main():
         rows, cols = HEIGHT // CELL_SIZE, WIDTH // CELL_SIZE
         maze = generate_maze(rows, cols)
         start = (1, 1)
-        end = (rows - 2, cols - 2)
-        # Ensure the end position is on a path cell
-        while maze[end[0]][end[1]] != 0:
-            end = (random.randint(1, rows - 2), random.randint(1, cols - 2))
-        path = solve_maze(maze, start, end)
-        return maze, start, end, path
+        end = find_farthest_point(maze, start)
+        return maze, start, end
 
-    maze, player_pos, end, path = new_maze()
+    maze, player_pos, end = new_maze()
 
     running = True
     won = False
@@ -112,10 +103,10 @@ def main():
                 running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
-                    maze, player_pos, end, path = new_maze()
+                    maze, player_pos, end = new_maze()
                     won = False
                 elif event.key == pygame.K_SPACE:
-                    maze, player_pos, end, path = new_maze()
+                    maze, player_pos, end = new_maze()
                     won = False
                 elif event.key == pygame.K_UP:
                     new_pos = (player_pos[0] - 1, player_pos[1])
@@ -140,37 +131,9 @@ def main():
 
         screen.fill(BLACK)
         draw_maze(screen, maze)
-        draw_solution(screen, path)
         draw_player(screen, player_pos)
         draw_end_point(screen, end)
         pygame.display.flip()
-
-        if won:
-            # Display winning message and wait for user input
-            screen.fill(BLACK)
-            font = pygame.font.SysFont(None, 55)
-            text = font.render("Congratulations! You solved the maze!", True, WHITE)
-            screen.blit(text, (WIDTH // 4 - 50, HEIGHT // 2 - 50))
-            restart_text = font.render("Press R to Restart or Q to Quit", True, WHITE)
-            screen.blit(restart_text, (WIDTH // 4 - 50, HEIGHT // 2 + 50))
-            pygame.display.flip()
-
-            waiting = True
-            while waiting:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        running = False
-                        waiting = False
-                    elif event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_r:
-                            maze, player_pos, end, path = new_maze()
-                            won = False
-                            waiting = False
-                        elif event.key == pygame.K_q:
-                            running = False
-                            waiting = False
-
-        clock.tick(FPS)
 
     pygame.quit()
 
