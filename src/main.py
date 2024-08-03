@@ -6,7 +6,7 @@ CELL_SIZE = 20
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-RED = (255, 0, 0)
+RED = (255, 0, 0)  # From maze-solver branch
 
 def generate_maze(rows, cols):
     maze = [[1 for _ in range(cols)] for _ in range(rows)]
@@ -51,7 +51,7 @@ def draw_maze(screen, maze):
             color = WHITE if maze[row][col] == 0 else BLACK
             pygame.draw.rect(screen, color, pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
-def solve_maze(maze, start, end):
+def solve_maze(maze, start, end):  # From maze-solver branch
     rows, cols = len(maze), len(maze[0])
     stack = [start]
     path = []
@@ -70,7 +70,7 @@ def solve_maze(maze, start, end):
 
     return path
 
-def draw_solution(screen, path):
+def draw_solution(screen, path):  # From maze-solver branch
     for cell in path:
         row, col = cell
         pygame.draw.rect(screen, RED, pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE))
@@ -83,9 +83,9 @@ def main():
     rows, cols = HEIGHT // CELL_SIZE, WIDTH // CELL_SIZE
     maze = generate_maze(rows, cols)
 
-    start = (1, 1)
-    end = (rows - 2, cols - 2)
-    path = solve_maze(maze, start, end)
+    start = (1, 1)  # From maze-solver branch
+    end = (rows - 2, cols - 2)  # From maze-solver branch
+    path = solve_maze(maze, start, end)  # From maze-solver branch
 
     running = True
     while running:
@@ -95,7 +95,7 @@ def main():
 
         screen.fill(BLACK)
         draw_maze(screen, maze)
-        draw_solution(screen, path)
+        draw_solution(screen, path)  # From maze-solver branch
         pygame.display.flip()
 
     pygame.quit()
