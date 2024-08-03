@@ -70,7 +70,7 @@ def draw_maze(screen, maze):
     rows, cols = len(maze), len(maze[0])
     for row in range(rows):
         for col in range(cols):
-            color = WHITE if maze[row][col] == 0 else BLACK
+            color = RED if maze[row][col] == 0 else BLACK
             pygame.draw.rect(screen, color, pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
 def draw_player(screen, player_pos):
